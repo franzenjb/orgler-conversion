@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orgler URL Converter - Power BI to Story Maps/RCView</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --red-cross-red: #ED1B2E;
+            --red-cross-dark: #6D6E70;
+            --red-cross-gray: #F5F5F5;
+            --red-cross-white: #FFFFFF;
+            --success-green: #28a745;
+            --info-blue: #17a2b8;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: var(--red-cross-red);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 2px 10px rgba(237, 27, 46, 0.3);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--red-cross-red);
+            font-weight: bold;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.95;
+            margin-top: 5px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .converter-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .converter-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--red-cross-gray);
+        }
+        
+        .converter-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--red-cross-red);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .converter-title {
+            flex: 1;
+        }
+        
+        .converter-title h2 {
+            font-size: 1.5rem;
+            color: var(--red-cross-dark);
+            margin-bottom: 5px;
+        }
+        
+        .converter-title p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--red-cross-dark);
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            background: #fafafa;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--red-cross-red);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(237, 27, 46, 0.1);
+        }
+        
+        .input-field:disabled {
+            background: var(--red-cross-gray);
+            cursor: not-allowed;
+        }
+        
+        .convert-button {
+            width: 100%;
+            padding: 15px;
+            background: var(--red-cross-red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .convert-button:hover {
+            background: #d91826;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(237, 27, 46, 0.3);
+        }
+        
+        .convert-button:active {
+            transform: translateY(0);
+        }
+        
+        .output-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid var(--red-cross-gray);
+            display: none;
+        }
+        
+        .output-section.active {
+            display: block;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .copy-button {
+            padding: 10px 20px;
+            background: var(--success-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .copy-button:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+        }
+        
+        .copy-button.copied {
+            background: var(--info-blue);
+        }
+        
+        .instructions-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+        }
+        
+        .instructions-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--red-cross-gray);
+        }
+        
+        .instructions-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--red-cross-red), #ff4757);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+        
+        .step {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .step:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .step-number {
+            min-width: 36px;
+            height: 36px;
+            background: var(--red-cross-red);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .step-content {
+            flex: 1;
+        }
+        
+        .step-content h4 {
+            color: var(--red-cross-dark);
+            margin-bottom: 8px;
+        }
+        
+        .step-content p {
+            color: #666;
+            line-height: 1.8;
+        }
+        
+        .code-example {
+            background: #2d3436;
+            color: #74b9ff;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 10px 0;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .example-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .example-card:hover {
+            border-color: var(--red-cross-red);
+            box-shadow: 0 4px 15px rgba(237, 27, 46, 0.1);
+        }
+        
+        .example-label {
+            font-weight: 600;
+            color: var(--red-cross-red);
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .example-url {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            color: #495057;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .footer a {
+            color: var(--red-cross-red);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .converter-card, .instructions-card {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 1.4rem;
+            }
+            
+            .step {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .examples-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(237, 27, 46, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(237, 27, 46, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(237, 27, 46, 0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">+</div>
+            <div>
+                <h1>Orgler URL Converter</h1>
+                <div class="subtitle">Power BI URL Creator for Story Maps & RCView Embedding</div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="converter-card">
+            <div class="converter-header">
+                <div class="converter-icon">🔄</div>
+                <div class="converter-title">
+                    <h2>Convert Power BI URL</h2>
+                    <p>Transform your Power BI report URL into an Orgler-compatible format for embedding</p>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label class="input-label">
+                    <span>📋</span>
+                    <span>Paste your Power BI URL here:</span>
+                </label>
+                <textarea 
+                    id="powerbiUrl" 
+                    class="input-field" 
+                    placeholder="https://app.powerbi.com/groups/1d2daae6-e367-4ced-91ee-21b2e3f2cfa4/reports/1044f1ec-995c-4c18-b650-a0673feb1ffd/8285b56350859ec8b05d?experience=power-bi"
+                    rows="3"
+                ></textarea>
+            </div>
+            
+            <button class="convert-button" onclick="convertUrl()">
+                <span>⚡</span>
+                <span>Convert to Orgler URL</span>
+            </button>
+            
+            <div id="outputSection" class="output-section">
+                <div class="success-message">
+                    <span>✅</span>
+                    <span>URL successfully converted!</span>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">
+                        <span>🔗</span>
+                        <span>Orgler URL for Story Map/RCView:</span>
+                    </label>
+                    <textarea 
+                        id="orglerUrl" 
+                        class="input-field" 
+                        rows="3"
+                        readonly
+                    ></textarea>
+                </div>
+                
+                <button class="copy-button" onclick="copyToClipboard()">
+                    <span id="copyIcon">📋</span>
+                    <span id="copyText">Copy to Clipboard</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="instructions-card">
+            <div class="instructions-header">
+                <div class="instructions-icon">📚</div>
+                <div class="converter-title">
+                    <h2>How to Use This Tool</h2>
+                    <p>Step-by-step guide for creating embeddable Power BI links</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Open Your Power BI Report</h4>
+                    <p>From the Group workspace in Power BI Service, open the report from the Reports tab (not Dashboards) within the workspace.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Navigate to Desired Page</h4>
+                    <p>Navigate to the report page you want the report to default to when consumed by your RC View user.</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Copy the Power BI URL</h4>
+                    <p>From the browser address bar, copy the entire URL. It should look like this:</p>
+                    <div class="code-example">https://app.powerbi.com/groups/[group-id]/reports/[report-id]/[section]</div>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Paste and Convert</h4>
+                    <p>Paste your Power BI URL into the converter above and click "Convert to Orgler URL".</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h4>Use in Story Map/RCView</h4>
+                    <p>Copy the generated Orgler URL and use it as your embed link in RC View or ArcGIS Story Maps.</p>
+                </div>
+            </div>
+            
+            <h3 style="margin-top: 40px; margin-bottom: 20px; color: var(--red-cross-dark);">Example Conversions</h3>
+            
+            <div class="examples-grid">
+                <div class="example-card">
+                    <div class="example-label">DSC Dashboard</div>
+                    <div class="example-url">
+                        <strong>Input:</strong><br>
+                        https://app.powerbi.com/groups/573e6237-a6bf-44ab-8dda-ba0c703b6791/reports/dceef683-6813-4f4c-a8f7-1cce4fac0fa2/ReportSection
+                    </div>
+                    <div class="example-url" style="margin-top: 10px;">
+                        <strong>Output:</strong><br>
+                        https://orglerws.redcross.org/PowerBI/Home/Report/dceef683-6813-4f4c-a8f7-1cce4fac0fa2/ReportSection
+                    </div>
+                </div>
+                
+                <div class="example-card">
+                    <div class="example-label">REC Dashboard</div>
+                    <div class="example-url">
+                        <strong>Input:</strong><br>
+                        https://app.powerbi.com/groups/573e6237-a6bf-44ab-8dda-ba0c703b6791/reports/ac99ebff-5905-4d07-84db-36163ba59613/ReportSection
+                    </div>
+                    <div class="example-url" style="margin-top: 10px;">
+                        <strong>Output:</strong><br>
+                        https://orglerws.redcross.org/PowerBI/Home/Report/ac99ebff-5905-4d07-84db-36163ba59613/ReportSection
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer">
+        <p>American Red Cross - Orgler URL Converter Tool</p>
+        <p style="margin-top: 10px;">
+            <a href="https://github.com/franzenjb/orgler-conversion" target="_blank">View on GitHub</a>
+        </p>
+    </footer>
+    
+    <script>
+        function convertUrl() {
+            const input = document.getElementById('powerbiUrl').value.trim();
+            
+            if (!input) {
+                alert('Please enter a Power BI URL');
+                return;
+            }
+            
+            // Handle both encoded and non-encoded URLs
+            let url = input;
+            
+            // If the URL is encoded (contains %3A%2F%2F), decode it first
+            if (url.includes('%3A%2F%2F')) {
+                // Extract the actual URL from the encoded string
+                // Look for the pattern that contains the Power BI URL
+                const match = url.match(/https%3A%2F%2Fapp\.powerbi\.com[^&]*/);
+                if (match) {
+                    url = decodeURIComponent(match[0]);
+                }
+            }
+            
+            // Now parse the decoded URL
+            if (!url.includes('app.powerbi.com')) {
+                alert('Please enter a valid Power BI URL');
+                return;
+            }
+            
+            // Extract the report ID and section from the URL
+            // Pattern: /reports/{report-id}/{section}
+            const reportMatch = url.match(/\/reports\/([^\/]+)\/([^?]*)/);
+            
+            if (!reportMatch) {
+                alert('Could not parse the Power BI URL. Please check the format.');
+                return;
+            }
+            
+            const reportId = reportMatch[1];
+            const section = reportMatch[2] || 'ReportSection';
+            
+            // Handle the query parameters if they exist
+            let queryParams = '';
+            const queryMatch = url.match(/\?(.+)$/);
+            if (queryMatch) {
+                queryParams = '?' + queryMatch[1];
+            }
+            
+            // Build the Orgler URL
+            const orglerUrl = `https://orglerws.redcross.org/PowerBI/Home/Report/${reportId}/${section}${queryParams}`;
+            
+            // Display the result
+            document.getElementById('orglerUrl').value = orglerUrl;
+            document.getElementById('outputSection').classList.add('active');
+            
+            // Scroll to the output
+            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function copyToClipboard() {
+            const orglerUrl = document.getElementById('orglerUrl');
+            orglerUrl.select();
+            orglerUrl.setSelectionRange(0, 99999); // For mobile devices
+            
+            navigator.clipboard.writeText(orglerUrl.value).then(function() {
+                const copyButton = document.querySelector('.copy-button');
+                const copyIcon = document.getElementById('copyIcon');
+                const copyText = document.getElementById('copyText');
+                
+                copyButton.classList.add('copied');
+                copyIcon.textContent = '✅';
+                copyText.textContent = 'Copied!';
+                
+                setTimeout(() => {
+                    copyButton.classList.remove('copied');
+                    copyIcon.textContent = '📋';
+                    copyText.textContent = 'Copy to Clipboard';
+                }, 2000);
+            }, function(err) {
+                alert('Could not copy text: ' + err);
+            });
+        }
+        
+        // Allow Enter key to trigger conversion
+        document.getElementById('powerbiUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                convertUrl();
+            }
+        });
+        
+        // Auto-convert if URL is pasted
+        document.getElementById('powerbiUrl').addEventListener('paste', function(e) {
+            setTimeout(() => {
+                const pastedText = e.target.value;
+                if (pastedText.includes('app.powerbi.com')) {
+                    convertUrl();
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
